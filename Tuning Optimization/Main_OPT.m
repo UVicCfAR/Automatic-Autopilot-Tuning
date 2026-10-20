@@ -24,8 +24,8 @@ WithTail = 1;
 
 % Vehicle
 FTV                        = 3; % Vehicle Generation 
-vehicleType                = "F";
-testPlans.CG                = [ 61.6 ];
+vehicleType                = "G";
+testPlans.CG                = [ "TBF" ];
 testPlans.mass              = [ "7P" ];    % Placeholder for 7P
 testPlans.inertiaScale      = [0];         % Inertia scale
 
@@ -39,7 +39,7 @@ testPlans.terrainOffset     = [0];     % Offset applied to sim terrain height (s
 
 % Conditions
 windSpeed = [0];                % Set of wind speeds (kts)
-windTurb  = [0.0];              % Turbulence to accompany each speed
+windTurb  = [0.25];              % Turbulence to accompany each speed
 windDir   = [0];                % Set of wind directions (WRT runway)
 testPlans.winds             = [windSpeed,windTurb,windDir];
 

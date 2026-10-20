@@ -60,8 +60,10 @@ end
         elseif(vehicleType == "E")
             FTV3E % Echo
         elseif(vehicleType == "F")
-            FTV3F % Echo config script
-            
+            FTV3F % Foxtrot config script
+            FTV3F_flag = 1; 
+        elseif(vehicleType == "G")
+            FTV3G % Golf config script
         else
             error("Unsupported Gen 3 model!");
         end
@@ -94,6 +96,15 @@ end
         FTV4A; % Lookup Inertias and Mass from Excel Reference Table
         
         AngularAccelOn = 0; % Set angular accel flag
+        
+        if Flap == 1 || Flap == 2
+            Slats_Cmd = 25;
+        elseif Flap == 3
+            Slats_Cmd = 33;
+        else
+            Slats_Cmd = 0;
+        end
+       
      else
         error('undefined FTV');
     end
