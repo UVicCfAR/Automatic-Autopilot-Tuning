@@ -1,7 +1,7 @@
-%% SimulationInitialization.m
+%% SimulationControlConfig16P.m
 % AUTHOR :Stephen Warwick
-% MODIFIED: Stephen Warwick
-% February 03, 2022
+% MODIFIED: Joao Figueira
+% March 19, 2026
 % Description:
 disp('SimulationControlConfig');
 %% Initialize Simulation Workspace
@@ -9,10 +9,10 @@ if ~exist('NoiseStd','var')
     SimulationSensorConfig;
 end
 
-PiccoloGainVersion  = "G73";
-ControlAllocation   = "M2 FTD";
+PiccoloGainVersion  = "G77";
+ControlAllocation   = "M2 Built-In-SplitAil";
 modelScale          = '16P5';
-
+BrakeControl = "PiccoloDefault";
 %% Define Control Parameters for Simulation
 CLAWs_On = 0; % We elect to disable internal BA CLaws for now...    
 % dt = 0.02; %Control model loop update rate is controlled by this step. use 20ms for Piccolo 
@@ -35,7 +35,7 @@ LonMode = 0;
 Sw          = 4.663;% m^2
 b           = 5.54; % m;wing span
 c           = Sw/b; % m;average wing chord
-CL_Max      = 0.54;
+CL_Max      = 0.540;
 CL_Max_Nom  = 0.465;
 CL_cruise   = 0.300;
 
@@ -51,17 +51,17 @@ nMin_User   = -1.3;     % in g; from the point of view of structure
 m = MassBWB; % Use true model mass (representative of mass estimation in controller)
 
 % Lateral Axis
-XInertia = 102.630;  % kgm^2 % Updated TBF4-TOW1
+XInertia = 106.7010;  % kgm^2 % Updated TBF6-TOW1
 
 % XInertia=IXX/3417.17; % Direct from model configuration
 
 % Pitch Axis
-YInertia = 129.375;  % kgm^2 % Updated TBF4-TOW1
+YInertia = 130.0175;  % kgm^2 % Updated TBF6-TOW1
 
 % YInertia=IYY/3417.17;   % Direct from model configuration
 
 % Directional Axis
-ZInertia = 216.411;  % kgm^2 % Updated TBF4-TOW1
+ZInertia = 221.0685;  % kgm^2 % Updated TBF6-TOW1
 
 % ZInertia=IZZ/3417.17;  % Direct from model configuration
 
@@ -70,14 +70,14 @@ SteeringArm         = 1.25;
 
 %% Airspeed Control (airspeed mode)
 %Bandwidth
-TASBandwidth    = 0.03; %Hz
+TASBandwidth    = 0.03; %Hz %0.03
 Fp_TAS          = 0.55*2*pi*TASBandwidth;
 
 % Flag to enable priority switch for TAS protection modes.
 % Disabled until better matched.
 Enable_TAS_Protection = 0;
 
-TASRateErr2VRate    = 1.50;
+TASRateErr2VRate    = 0.50;
 TASRateErrInt2VRate = 1.50;
 TASRateMax      = 0.7; % m/s^2; also used in throttle control to saturate desired energy rate
 
@@ -86,14 +86,14 @@ ThrottleTrim    = 0.14; %0.2
 MaxEnginePower  = 50000; %W 50000
 
 % Increased I-term
-PowerError2Throttle     = 0.5; %0.9
-PowerErrorInt2Throttle  = 0.5; %0.2
-ThrottlePredictionTrust = 0.9; %0.9
+PowerError2Throttle     = 1.0; %0.9
+PowerErrorInt2Throttle  = 0.4; %0.2
+ThrottlePredictionTrust = 0.2; %0.9
 
 % Low pass filters
 ThrottleLpfCutoff = 0.35; % Hz
 
-EnergyBandwidth = 0.02; %Hz;0.02
+EnergyBandwidth = 0.04; %Hz;0.02
 
 Fp_Throttle     = 0.55*2*pi*ThrottleLpfCutoff*dt; % It appears this param is input as Rad/s NOT Hz
 Fp_Energy       = 0.55*2*pi*EnergyBandwidth;
@@ -103,6 +103,8 @@ Fp_Energy2      = 0.55*2*pi*EnergyBandwidth*dt;
 ThrottleMax     = 0.80;
 ThrottleMin     = 0.03; % Std 
 ThrottleRateMax = 0.2; %s; not in documentation, but in PCC
+SlowIASerr         = 4.0; % m/s
+FastIASerr         = 6.0; % m/s
 
 % EXTERNAL LOGIC
 % To apply slower slew during throttle cut in flare.
@@ -129,10 +131,10 @@ AltMax             = 10000;
 AltMin             = 0;
 
 % Vertical Rate to Pitch Gains
-AltRateError2Pitch      = 0.34; 
-AltRateErrorInt2Pitch   = 0.61;  
-AltRateCmd2Pitch        = 0.26;
-AltMaxAccel             = 2.5; %m/s/s
+AltRateError2Pitch      = 0.68; 
+AltRateErrorInt2Pitch   = 0.34;  
+AltRateCmd2Pitch        = 0.40;
+AltMaxAccel             = 1.20; %m/s/s
 
 % Filters
 % Airspeed Filter
@@ -151,18 +153,17 @@ PitchMin    = -PitchMax;
 %% Pitch Control
 ElevatorTrim =-3.5; % default: -5
 
-%G74
-PitchRateError2Accel    = 1.98; % 
-PitchRateErrorInt2Accel = 1.38; % 
-PitchDampingTrust       = 0.15;
-PitchStiffnessTrust     = 0.4;
+PitchRateError2Accel    = 2.9; % 
+PitchRateErrorInt2Accel = 1.10; % 
+PitchDampingTrust       = 0.3; 
+PitchStiffnessTrust     = 0.4; 
 
 PitchMaxAccel   = 2.0; % rad/s^2; used in rate limiter
 
 %Vehicle Properties
-ElevatorPower   = -(0.00301+elvPwr_add); % /deg
-PitchDamping    = -1.2608; % Cm/qbar
-PitchStiffness  = -0.0041; % /deg
+ElevatorPower   = -0.003; % /deg
+PitchDamping    = -0.6; %-1.2608; % Cm/qbar
+PitchStiffness  = -0.0002; % /deg
 
 % Limits
 PitchRateMax_User   = 30; % deg/s, used in saturation block
@@ -170,11 +171,11 @@ PitchRateMax_User   = PitchRateMax_User/180*pi; % rad/s, used in saturation bloc
 ElevatorMax         = 25; %deg
 
 %Low pass filters
-PitchBandwidth  = 0.5; %Hz
+PitchBandwidth  = 0.6; %Hz
 Fp_Pitch        = 0.55*2*pi*PitchBandwidth; % used for generating pitch rate command
 Fp_Pitch_2      = 0.55*2*pi*PitchBandwidth*dt; % used in the low pass filter for lift coefficient
 
-PitchRateLpfCutoff 	= 3; %Hz; bad name; it is actually used for filtering the elevator ouput
+PitchRateLpfCutoff 	= 4; %Hz; bad name; it is actually used for filtering the elevator ouput
 Fp_Elevator         = 0.55*2*pi*PitchRateLpfCutoff*dt;
 
 %% Lateral Control (Bank to Aileron)
@@ -206,9 +207,9 @@ AileronTrim = 0;
 
 % Re-Optimized Trial 1 (Damping Trust = 0)
 % Appears to be best performing
-RollRateError2Accel    = 7; 
-RollRateErrorInt2Accel = 8;
-YawRateErr2Rudder      = 6;
+RollRateError2Accel    = 10.7; 
+RollRateErrorInt2Accel = 5.0;
+YawRateErr2Rudder      = 8;
 RollDampingTrust       = 0;
 
 % Limits
@@ -217,13 +218,13 @@ AileronSurfaceMax   = 45; % Deg, actual max range of surface map (for use in mix
 
 %Vehicle Properties
 AileronPower    = 0.00268; % /deg
-RollDamping     = -0.3475; % Cl/pbar
+RollDamping     = -0.32; % Cl/pbar
 %Low pass filters
 RollRateLpfCutoff   = 3; % Hz 
 Fp_Aileron          = 0.55*2*pi*RollRateLpfCutoff*dt;
 
 %% Yaw Rate to Rudder (Bank angle defines desired yaw rate)
-SideForceErrInt2Rudder = 2.0; % it is used in another
+SideForceErrInt2Rudder = 0.2; % it is used in another
 % rudder_coordination based on side force/lateral acceleration
 
 % Limits
@@ -296,9 +297,8 @@ ClimboutTimer   = 7.0; %s, time from start of climbout until advancing to Flight
 %% Flaps
 % Limits
 % flapMax     = 0;  % Disabled
-% flapMax     = 33; % Vanilla Flaps
-% flapMax     = 25; % Flaperons
-flapMax     = 0; % Split Aileron (FTD)
+% flapMax     = 33; % Fowler Flaps F3
+flapMax     = 33; % Fowler Flaps F2
 
 flapRate    = 7.5; % FTD delpoyment rate (deg/s)
 % flapRate    = 6.6; % FLAP
@@ -306,18 +306,27 @@ flapRate    = 7.5; % FTD delpoyment rate (deg/s)
 
 % Aero params
 % dCl_per_dFlap = 0; % No CL change when using split ailerons. Unknown for Flaperon 
-dCl_per_dFlap = 0.005581818; %[/deg]
-% estimate to sim
-
+dCl_per_dFlap = 0.0065; %[/deg]
 dCd_per_dFlap = 0; %[/deg] Change in Cd per flap deflection. Appears unused in controller.. 
 
 % Flap commands per mode (deg)
 goAroundFlaps   = 0;
-downwindFlaps   = 0;
-baseLegFlaps    = 20;
-finalApproachFlaps  = 20;
-shortFinalFlaps     = 20; 
-rolloutFlaps        = 30;
+downwindFlaps   = goAroundFlaps;
+baseLegFlaps    = goAroundFlaps;
+finalApproachFlaps  = goAroundFlaps;
+shortFinalFlaps     = goAroundFlaps; 
+rolloutFlaps        = goAroundFlaps;
+
+%% Split Ailerons
+% Used in M2 Built-In-SplitAil and coded in the APM software (not Pic controller)
+SplitAilMax = 33;
+SplitAilRate    = 7.5; % Split-Ailerons delpoyment rate (deg/s)
+goAroundSplitAil   = 0;
+downwindSplitAil   = 0;
+baseLegSplitAil    = 20;
+finalApproachSplitAil  = 20;
+shortFinalSplitAil     = 20; 
+rolloutSplitAil        = 30;
 
 % IF using M2 with basic flaps, OR FTD Mixing,
 % this offset applied to elevons/flaperons when flaps commanded over 15.5 deg
